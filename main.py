@@ -23,7 +23,6 @@ def welcome_message():
 if __name__ == "__main__":
     welcome_message()
 
-    # Add more code here to guide users to the next steps
     print("\nNext Steps:")
     print("1. Navigate to the 'video_editing' folder to start with the video editing tutorials.")
     print("2. Check out the 'text_to_speech' folder for TTS integration.")
