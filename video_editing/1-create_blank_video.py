@@ -22,6 +22,6 @@ def create_blank_video(output_path, duration=10, fps=24, resolution=(1920, 1080)
 
 if __name__ == "__main__":
     # output path and file name
-    output_path = "./output_create_blank_video/blank_video.mp4"
+    output_path = "./1-output_create_blank_video/blank_video.mp4"
     create_blank_video(output_path)
     print(f"Blank video created and saved as {output_path}")
