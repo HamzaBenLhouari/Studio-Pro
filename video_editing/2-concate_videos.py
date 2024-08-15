@@ -1,7 +1,12 @@
 """
     You Need Input Files Here (Videos)
-    Put you Videos in "2-input_concate_videos" directory 
-    and wait the output video in "2-output_concate_videos" directory
+    Put your Videos in "2-input_concate_videos" directory 
+    and wait the output video in 
+    "2-output_concate_videos" directory
+    +++++++++++++++++++++++++++++++++++
+    if the videos have different resolution 
+    uncomment the code bellow to make one size
+    don't forget to choose the right format
 """
 import os
 import fnmatch
