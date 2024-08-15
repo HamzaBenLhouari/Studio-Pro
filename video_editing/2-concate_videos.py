@@ -16,7 +16,6 @@ def fetch_videos():
             print(file)
             videos.append("./2-input_concate_videos/"+file)
     if len(videos) == 0:
-        print("videos not found")
         return videos
     print("videos done")
     return videos
