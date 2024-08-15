@@ -3,10 +3,6 @@
     Put your Videos in "2-input_concate_videos" directory 
     and wait the output video in 
     "2-output_concate_videos" directory
-    +++++++++++++++++++++++++++++++++++
-    if the videos have different resolution 
-    uncomment the code bellow to make one size
-    don't forget to choose the right format
 """
 import os
 import fnmatch
@@ -27,18 +23,18 @@ def fetch_videos():
 
 def create_video_from_videos(videos):
     video = [VideoFileClip(i) for i in videos]
-    # if the videos have different resolution 
-    # uncomment the following code to make one size
-    # don't forget to choose the right format
-    """for i in range(len(video)):
-        video[i] = video[i].resize((1080, 1920))"""
-    video = concatenate_videoclips(video)
+    video = concatenate_videoclips(video,method='compose')
     video.write_videofile("./2-output_concate_videos/out.mp4", fps=30,remove_temp=True,
                                         codec="libx264",
                                         audio_codec="aac",
                                         threads = 6)
+
     
 def main():
     videos = fetch_videos()
+    if len(videos) <= 1 :
+        print("PLease Verify! You must have more than one Video")
+        return
     create_video_from_videos(videos)
+    
 main()
