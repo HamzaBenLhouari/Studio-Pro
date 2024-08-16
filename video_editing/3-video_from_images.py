@@ -6,7 +6,7 @@
 """
 import os
 import fnmatch
-from moviepy.editor import concatenate_videoclips, ImageClip, AudioFileClip
+from moviepy.editor import concatenate_videoclips, ImageClip
 
 def fetch_images():
     print("getting videos")
