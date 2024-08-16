@@ -2,7 +2,7 @@
     This Script takes the first Video in tha path given
     You Need Input Video File Here
     Put your Video in "5-input_video_to_audio" directory 
-    and wait the output video in 
+    and wait the output audio in 
     "5-output_audio" directory
 """
 import os
