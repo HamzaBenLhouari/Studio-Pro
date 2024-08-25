@@ -33,7 +33,7 @@ def add_bg_m_to_video(video,bg_m):
     # Load the background music 
     
     try:
-        audio = AudioFileClip(bg_m)
+        audio = AudioFileClip(bg_m).volumex(0.2)
     except Exception as e:
         raise ValueError("Failed to load background music. Error: " + str(e))
     
