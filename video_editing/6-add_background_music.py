@@ -33,15 +33,12 @@ def add_bg_m_to_video(video,bg_m):
     # Load the background music 
     
     try:
-        audio = AudioFileClip(bg_m).volumex(0.2)
+        audio = AudioFileClip(bg_m)
     except Exception as e:
         raise ValueError("Failed to load background music. Error: " + str(e))
     
     if audio is None:
         raise ValueError("The 'audio' clip failed to load and is None.")
-    
-    if audio_video is None:
-        raise ValueError("The 'audio'video clip failed to load and is None.")
     
     # if you want to start the audio in a time prefered
     """t_start = "00:01:50.35"
@@ -50,6 +47,18 @@ def add_bg_m_to_video(video,bg_m):
     if audio.duration < secs :
             audio=afx.audio_loop(audio,duration=secs)
     
+    if audio_video is None:
+        print("maybe your video don't have an audio so ...")
+        print("let's make one for it ")
+        video = video.set_audio(audio)
+        video = video.set_duration(secs)
+        video.write_videofile("./6-output_video_bg_m/out.mp4", fps=30,remove_temp=True,
+                                    codec="libx264",
+                                    audio_codec="aac",
+                                    threads = 6)
+        return
+    
+    audio=audio.volumex(0.3)    
     try:
         final_audio = CompositeAudioClip([audio_video, audio])
     except AttributeError as e:
