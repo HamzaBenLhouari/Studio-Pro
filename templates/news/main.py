@@ -21,13 +21,6 @@ if 'articles' in topheadlines:
         description = article.get('description', 'No description available')
         image_url = article.get('urlToImage', 'No image available')
 
-        # Print the extracted fields
-        """print("Title:", title)
-        print("Author:", author)
-        print("Description:", description)
-        print("Image URL:", image_url)
-        print()"""
-        #
         if image_url != "No image available":
             image = download_image(image_url,title)
             images.append(image)

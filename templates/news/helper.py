@@ -79,7 +79,7 @@ def generate_video(images,audios):
     audio_clips =[]
     image_clips = []
 
-    video_Clip = VideoFileClip("./my_background_video/backgroundvideo.mp4")
+    video_Clip = VideoFileClip("./bg_video/backgroundvideo.mp4")
 
     end_time = 0
 
@@ -100,9 +100,9 @@ def generate_video(images,audios):
         
     video_Clip = video_Clip.subclip(0, end_time)
 
-    audio_final = CompositeAudioClip(
+    """audio_final = CompositeAudioClip(
             [*audio_clips])
-    video_Clip.audio = audio_final
+    video_Clip.audio = audio_final"""
 
     final_video_file = CompositeVideoClip(
             [video_Clip, *image_clips])
