@@ -2,7 +2,7 @@ from newsapi import NewsApiClient
 from helper import tts, generate_video, download_image, sessionid, voice_type
 import time
 import os
-
+#my_api_key='902b84a90473457c8778e40f163e4259'
 api = NewsApiClient(api_key='902b84a90473457c8778e40f163e4259')
 
 topheadlines = api.get_top_headlines(sources='bbc-news')

@@ -2,6 +2,7 @@ import os, requests, base64, playsound
 from moviepy.editor import AudioFileClip, VideoFileClip, ImageClip, CompositeVideoClip, CompositeAudioClip
 import moviepy.video.fx.all as vfx
 import moviepy.audio.fx.all as afx
+import fnmatch
 
 
 voice_type="en_us_009"
@@ -78,7 +79,7 @@ def tts(session_id: str, text_speaker: str = "en_us_002", req_text: str = "TikTo
 def generate_video(images,audios):
     audio_clips =[]
     image_clips = []
-
+    bg_video = get_bg('*.mp4')
     video_Clip = VideoFileClip("./bg_video/backgroundvideo.mp4")
 
     end_time = 0
@@ -88,7 +89,7 @@ def generate_video(images,audios):
     for (c,a) in zip(images,audios):
         image_clip = configure_image(c,w_video,h_video)
         a = AudioFileClip(a).set_start(end_time)
-        if video_Clip.duration < (end_time + a.duration + 0.75):
+        if video_Clip.duration < (end_time + a.duration):
             video_Clip = video_Clip.fx(vfx.loop,duration=end_time + a.duration + 0.75)
         audio_clips.append(a.set_start(end_time))
         image_clips.append(image_clip.set_start(end_time)
@@ -110,6 +111,7 @@ def generate_video(images,audios):
     # adding background music 
 
     """"secs=final_video_file.duration
+    bg_audio = get_bg('*.mp3')
     back_audio = AudioFileClip("./backgroundmusic/oldnews.mp3").volumex(0.3)
     
     if back_audio.duration < secs :
@@ -137,3 +139,23 @@ def configure_image(image,w_video,h_video):
         (width_to_set, height_to_set + 70))
     
     return image_clip
+
+
+def get_bg(ext):
+    folder = ""
+    if ext == "*.mp4":
+        folder = "./bg_video"
+    else :
+        folder = "./bg_music"
+    rslt=""
+    listdir = os.listdir(folder)
+    if len(listdir) == 0 :
+        print("logo not found")
+        return ""
+    for file in listdir:
+        if fnmatch.fnmatch(file.lower(), ext):
+            print(file)
+            rslt = os.path.join(folder, file)
+            return rslt
+    if rslt == "":
+        return
