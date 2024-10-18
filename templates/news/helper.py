@@ -3,10 +3,13 @@ from moviepy.editor import AudioFileClip, VideoFileClip, ImageClip, CompositeVid
 import moviepy.video.fx.all as vfx
 import moviepy.audio.fx.all as afx
 import fnmatch
-
-
+from PIL import Image
+"""
+pip uninstall Pillow
+pip install Pillow==9.5.0
+"""
 voice_type="en_us_009"
-sessionid="20bd2616fae5f5592f824cf4f55f37fb"
+sessionid="32d5799cd747a4e2ce47cafb59a1a0e4"
 
 def download_image(image,title):
     # Send a GET request to the URL
@@ -18,11 +21,11 @@ def download_image(image,title):
         image_data = response.content
 
         # Save the image data to a file
-        with open("{}.jpg".format(title), "wb") as f:
+        with open("./images/{}.jpg".format(title), "wb") as f:
             f.write(image_data)
 
         print("Image downloaded successfully")
-        return "{}.jpg".format(title)
+        return "./images/{}.jpg".format(title)
     else:
         print("Failed to download the image")
         return ""
@@ -80,7 +83,7 @@ def generate_video(images,audios):
     audio_clips =[]
     image_clips = []
     bg_video = get_bg('*.mp4')
-    video_Clip = VideoFileClip("./bg_video/backgroundvideo.mp4")
+    video_Clip = VideoFileClip(bg_video)
 
     end_time = 0
 
@@ -88,18 +91,26 @@ def generate_video(images,audios):
 
     for (c,a) in zip(images,audios):
         image_clip = configure_image(c,w_video,h_video)
-        a = AudioFileClip(a).set_start(end_time)
+        audio_clip = AudioFileClip(a)
+        image_clip.set_audio(audio_clip)
+        image_clip.set_duration(a.duration)
+        image_clips.append(image_clip)
+        end_time = end_time + a.duration
+        """a = AudioFileClip(a).set_start(end_time)
         if video_Clip.duration < (end_time + a.duration):
             video_Clip = video_Clip.fx(vfx.loop,duration=end_time + a.duration + 0.75)
         audio_clips.append(a.set_start(end_time))
         image_clips.append(image_clip.set_start(end_time)
                                      .set_pos("center", "center")
                                      .set_duration(a.duration)
-                                     .set_audio(a))
+                                     .set_audio(a))"""
             
-        end_time = end_time + a.duration + 0.75
-        
-    video_Clip = video_Clip.subclip(0, end_time)
+        #end_time = end_time + a.duration + 0.75
+    #news_clip = 
+    if video_Clip.duration < end_time :
+            video_Clip = video_Clip.fx(vfx.loop,duration=end_time + 0.75)
+    else :
+        video_Clip = video_Clip.subclip(0, end_time)
 
     """audio_final = CompositeAudioClip(
             [*audio_clips])
@@ -110,18 +121,17 @@ def generate_video(images,audios):
     
     # adding background music 
 
-    """"secs=final_video_file.duration
+    secs=final_video_file.duration
     bg_audio = get_bg('*.mp3')
-    back_audio = AudioFileClip("./backgroundmusic/oldnews.mp3").volumex(0.3)
+    back_audio = AudioFileClip(bg_audio).volumex(0.3)
     
     if back_audio.duration < secs :
         back_audio=afx.audio_loop(back_audio,duration=secs)
       
-    back_audio=back_audio.volumex(0.5)
     final_audio = CompositeAudioClip([final_video_file.audio,back_audio])
     final_video_file = final_video_file.set_audio(final_audio)
     final_video_file = final_video_file.set_duration(secs)
-        """
+        
     final_video_file.write_videofile("./finalvideo.mp4",
                               audio_codec='aac', fps=30, threads=4)
 
@@ -136,7 +146,7 @@ def configure_image(image,w_video,h_video):
     height_to_set = width_to_set * h_img / w_video
 
     image_clip = image_clip.resize(
-        (width_to_set, height_to_set + 70))
+        (width_to_set, height_to_set + 70),Image.Resampling.LANCZOS)
     
     return image_clip
 
