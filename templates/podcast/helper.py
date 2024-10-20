@@ -167,10 +167,11 @@ def get_file(file):
     rslt = ""
     folder=""
     if file == "img":
+        image_extensions = ['*.jpg', '*.jpeg', '*.png', '*.bmp', '*.gif', '*.tiff']
         folder = "./image"
         listdir = os.listdir(folder)
         for file in listdir:
-            if fnmatch.fnmatch(file.lower(), 'voice.mp3'):
+            if any(fnmatch.fnmatch(file.lower(), ext) for ext in image_extensions):
                 rslt = os.path.join(folder, file)
                 return rslt
     if file == "audio":
