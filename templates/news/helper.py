@@ -91,30 +91,22 @@ def generate_video(images,audios):
 
     for (c,a) in zip(images,audios):
         image_clip = configure_image(c,w_video,h_video)
-        audio_clip = AudioFileClip(a)
-        image_clip.set_audio(audio_clip)
-        image_clip.set_duration(a.duration)
-        image_clips.append(image_clip)
-        end_time = end_time + a.duration
-        """a = AudioFileClip(a).set_start(end_time)
-        if video_Clip.duration < (end_time + a.duration):
-            video_Clip = video_Clip.fx(vfx.loop,duration=end_time + a.duration + 0.75)
-        audio_clips.append(a.set_start(end_time))
+        audio_clip = AudioFileClip(a).set_start(end_time)
+        audio_clips.append(audio_clip)
         image_clips.append(image_clip.set_start(end_time)
                                      .set_pos("center", "center")
-                                     .set_duration(a.duration)
-                                     .set_audio(a))"""
-            
-        #end_time = end_time + a.duration + 0.75
-    #news_clip = 
+                                     .set_duration(audio_clip.duration)
+                                     .set_audio(audio_clip))
+        end_time = end_time + audio_clip.duration + 0.75
+    
     if video_Clip.duration < end_time :
             video_Clip = video_Clip.fx(vfx.loop,duration=end_time + 0.75)
     else :
-        video_Clip = video_Clip.subclip(0, end_time)
+        video_Clip = video_Clip.subclip(0, end_time + 0.75)
 
-    """audio_final = CompositeAudioClip(
+    audio_final = CompositeAudioClip(
             [*audio_clips])
-    video_Clip.audio = audio_final"""
+    video_Clip.audio = audio_final
 
     final_video_file = CompositeVideoClip(
             [video_Clip, *image_clips])
@@ -159,13 +151,10 @@ def get_bg(ext):
         folder = "./bg_music"
     rslt=""
     listdir = os.listdir(folder)
-    if len(listdir) == 0 :
-        print("logo not found")
-        return ""
-    for file in listdir:
-        if fnmatch.fnmatch(file.lower(), ext):
-            print(file)
-            rslt = os.path.join(folder, file)
-            return rslt
-    if rslt == "":
-        return
+    if len(listdir) != 0 :
+        for file in listdir:
+            if fnmatch.fnmatch(file.lower(), ext):
+                print(file)
+                rslt = os.path.join(folder, file)
+                return rslt
+    return rslt
