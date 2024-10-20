@@ -106,7 +106,7 @@ def generate_video():
         bg_music=afx.audio_loop(audio,duration=audio.duration+1)
         bg_music.fx(afx.audio_fadein,1).fx(afx.audio_fadeout,1)
     else :
-        bg_music.subclip(0,audio.duration+1)
+        bg_music = bg_music.subclip(0, audio.duration+5)
         bg_music.fx(afx.audio_fadein,1).fx(afx.audio_fadeout,1)
 
     final_audio = CompositeAudioClip([bg_music,audio])
