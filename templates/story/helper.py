@@ -7,22 +7,14 @@ from moviepy.editor import concatenate_audioclips, CompositeAudioClip, Composite
 import moviepy.video.fx.all as vfx
 import moviepy.audio.fx.all as afx
 
-ELEVENLAB_KEY=""
+ELEVENLAB_KEY="3cd04161eb64b39de66b5d198babc762"
 
 voice_character = {
-    "Narrator":"Josh",
-    "Narrator_2":"Fin",
-    "Narrator_3":"Glinda",
+    "Narrator":"Bill",
+    "Narrator_2":"Lily",
+    "Narrator_3":"Matilda",
     "Narrator_4":"Sarah",
-    "Narrator_5":"Jessie",
-    "Boy":"Gigi",
-    "Girl":"Freya",
-    "Santa_Claus":"🎅 Santa Claus",
-    "father":"Bill",
-    "mother":"Charlotte",
-    "bad_guy":"Callum",
-    "P":"Freya",
-    "G":"Glinda",
+    "Narrator_5":"Will",
     }
 
 
@@ -114,12 +106,13 @@ def generate_video():
     if (len(images)==0 or len(audios)==0)or(len(images)!=len(audios)):
         print("verify your files please!")
         return
+    end_time=0
     for (image, audio) in zip(images, audios):
-        audioClip = AudioFileClip(audio).fx(afx.audio_fadein,1).fx(afx.audio_fadeout,1)
-        imageClip = ImageClip(image).set_duration(audioClip.duration).set_audio(audioClip)
+        audioClip = AudioFileClip(audio).fx(afx.audio_fadein,1).fx(afx.audio_fadeout,1).set_start(end_time)
+        imageClip = ImageClip(image).set_duration(audioClip.duration).set_audio(audioClip).set_start(end_time)
         image_clips.append(imageClip.fx(vfx.fadein,1).fx(vfx.fadeout,1))
-    
-    final_video_file = CompositeVideoClip(image_clips)
+        end_time=end_time+audioClip.duration+1
+    final_video_file = CompositeVideoClip([*image_clips])
 
     # adding background music 
 
@@ -127,11 +120,11 @@ def generate_video():
     bg_audio = get_bg()
     back_audio = AudioFileClip(bg_audio).volumex(0.3)
     
-    if back_audio.duration < secs :
-        back_audio=afx.audio_loop(back_audio,duration=secs)
+    if back_audio.duration < end_time :
+        back_audio=afx.audio_loop(back_audio,duration=end_time)
         back_audio.fx(afx.audio_fadein,1).fx(afx.audio_fadeout,1)
     else :
-        back_audio = back_audio.subclip(0, secs+5)
+        back_audio = back_audio.subclip(0, end_time)
         back_audio.fx(afx.audio_fadein,1).fx(afx.audio_fadeout,1)
       
     final_audio = CompositeAudioClip([final_video_file.audio,back_audio])
