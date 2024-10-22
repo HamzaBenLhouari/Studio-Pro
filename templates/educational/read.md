@@ -43,3 +43,7 @@ Get-AppXPackage _Microsoft.ScreenSketch_ -AllUsers | Foreach {Add-AppxPackage -D
 
 - this will generate a low version
   manim -pql explain_circle_area.py ExplainCircleArea
+
+# Perfect Prompt for Similar Scripts:
+
+"Create a Python script using the Manim library that visually explains [concept, e.g., the area of a circle]. The script should include text animations synchronized with TTS-generated audio using an API. Each text should be displayed clearly, without overlapping with others, and the audio should play in sync with the displayed text. Ensure that each audio clip is played fully before moving on to the next part of the animation. Add a function that removes all generated audio files after the video is rendered, keeping only the final video output."
