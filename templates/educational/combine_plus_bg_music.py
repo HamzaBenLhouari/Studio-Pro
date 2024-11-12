@@ -1,6 +1,7 @@
 from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip
 import moviepy.audio.fx.all as afx
 from pydub import AudioSegment
+import os
 
 def pad_audio_to_duration(audio_file, target_duration, output_audio_file):
     """
@@ -53,6 +54,8 @@ def combine_video_with_audio(video_file, main_audio_file, background_audio_file,
     # Export the final video
     final_video.write_videofile(output_file, codec='libx264', audio_codec='aac')
     print(f"Final video with synchronized audio and background music saved as '{output_file}'")
+
+    os.remove(main_audio_file)
 
 # Usage
 video_file = "final_video.mp4"             # Path to your generated video file
