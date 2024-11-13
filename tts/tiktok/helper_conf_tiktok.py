@@ -2,33 +2,45 @@ import os, requests, base64, playsound
 
 
 def get_script():
-    print("getting text script")
-    script=""
-    with open("./tiktok_tts/script.txt") as f:
-        script = f.read()
-    if script == "" :
-        print("script is empty")
-    else : print("text script done")
+    """Fetches and returns the text script from the specified file."""
+    
+    file_path = "./tiktok_tts/script.txt"
+    
+    # Check if the file exists before trying to open
+    if not os.path.exists(file_path):
+        print(f"File not found: {file_path}")
+        return ""
+    
+    # Read the content of the script file
+    with open(file_path, 'r') as file:
+        script = file.read().strip()  # Strip to remove any leading/trailing whitespace
+    
+    if not script:
+        print("Script is empty")
+    else:
+        print("Text script retrieved successfully")
+    
     return script
-def get_sessionid():
-    print("getting session id")
-    sessionid = ""
-    with open("./tiktok_tts/session_id.txt") as f:
-        sessionid = f.read()
-    if sessionid == "":
-        print("session id not found")
-    else :
-        print("session id done")
-    return sessionid
+
 def get_voice_type():
-    print("getting voice type")
-    voice = ""
-    with open("./tiktok_tts/voice_model.txt") as f:
-        voice = f.read()
-    if voice == "":
-        print("voice not found")
-    else :
-        print("voice id done")
+    """Fetches and returns the voice type from the specified file."""
+    
+    file_path = "./tiktok_tts/voice_model.txt"
+    
+    # Check if the file exists before trying to open
+    if not os.path.exists(file_path):
+        print(f"File not found: {file_path}")
+        return ""
+    
+    # Read the content of the voice model file
+    with open(file_path, 'r') as file:
+        voice = file.read().strip()  # Strip to remove any leading/trailing whitespace
+    
+    if not voice:
+        print("Voice type not found")
+    else:
+        print("Voice type retrieved successfully")
+    
     return voice
 
 def tts(session_id: str, text_speaker: str = "en_us_002", req_text: str = "TikTok Text To Speech", filename: str = 'voice.mp3', play: bool = False):
