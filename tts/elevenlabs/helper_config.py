@@ -1,29 +1,39 @@
+import os
+
 def get_text():
-    print("getting text script")
-    script=""
-    with open("./eleven_labs_tts/script.txt") as f:
-        script = f.read()
-    if script == "" :
-        print("script is empty")
-    else : print("text script done")
+    """Retrieve and return the text script from a file if available."""
+    file_path = "./eleven_labs_tts/script.txt"
+    
+    # Check if file exists before attempting to read
+    if not os.path.exists(file_path):
+        print("Script file not found.")
+        return ""
+    
+    with open(file_path, 'r') as f:
+        script = f.read().strip()
+    
+    if script:
+        print("Text script loaded successfully.")
+    else:
+        print("Script is empty.")
+    
     return script
 
-def get_api_key():
-    print("getting api key")
-    api_key=""
-    with open("./eleven_labs_tts/api_key.txt") as f:
-        api_key = f.read()
-    if api_key == "" :
-        print("api key is empty")
-    else : print("api key done")
-    return api_key
-
 def get_voice_model():
-    print("getting voice model")
-    voice_model=""
-    with open("./eleven_labs_tts/voice_model.txt") as f:
-        voice_model = f.read()
-    if voice_model == "" :
-        print("voice model is empty")
-    else : print("voice model done")
+    """Retrieve and return the voice model from a text file if available."""
+    file_path = "./eleven_labs_tts/voice_model.txt"
+    
+    # Check if file exists before attempting to read
+    if not os.path.exists(file_path):
+        print("Voice model file not found.")
+        return ""
+    
+    with open(file_path, 'r') as f:
+        voice_model = f.read().strip()
+    
+    if voice_model:
+        print("Voice model loaded successfully.")
+    else:
+        print("Voice model is empty.")
+    
     return voice_model

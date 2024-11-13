@@ -1,64 +1,63 @@
 from elevenlabs import set_api_key,generate, save
-from helper_config import get_api_key, get_text, get_voice_model
+from helper_config import get_text, get_voice_model
 from moviepy.editor import concatenate_audioclips, AudioFileClip
 import time
+from dotenv import load_dotenv
+import os
 
 def main():
-
-    api_key=get_api_key()
-
-    if api_key == "":
-        return
-
+    """Generate audio files from text using the Eleven Labs API and save as a single concatenated MP3."""
+    
+    # Load environment variables from a .env file
+    load_dotenv()
+    
+    # Retrieve the API key from environment variables
+    api_key = os.getenv('ELEVEN_LABS_KEY')
+    if not api_key:
+        raise ValueError("API key not found. Please add it to a .env file as ELEVEN_LABS_KEY='your_api_key_here'")
     set_api_key(api_key)
-
-    my_text=get_text()
-
-    if my_text == "":
+    
+    # Retrieve text and voice model
+    my_text = get_text()
+    if not my_text:
+        print("No text found; terminating process.")
         return
-
-    voice_model=get_voice_model()
-
-    if voice_model == "":
+    
+    voice_model = get_voice_model()
+    if not voice_model:
+        print("No voice model found; terminating process.")
         return
+    
+    # Split the text script and initialize audio file list
+    segments = my_text.split("##")
+    audio_files = []
+    
+    # Generate audio for each text segment and save
+    for idx, segment in enumerate(segments, start=1):
+        print(f"Processing segment {idx}...")
 
-    results = my_text.split("##")
-
-    i=1
-
-    audios=[]
-      
-
-    for result in results :
-        """
-        # just for english content
+        # Generate audio for the current text segment
         audio = generate(
-            text=my_text,
-            voice=Voice(
-                voice_id='piTKgcLEGmPE4e6mEKli',
-                settings=VoiceSettings(stability=0.71, similarity_boost=0.5, style=0.0, use_speaker_boost=True)
-            )
-        )"""
-        
-        # for all languages 
-        audio = generate(
-        text=result,
-        voice=voice_model,
-        model="eleven_multilingual_v2"
+            text=segment,
+            voice=voice_model,
+            model="eleven_multilingual_v2"
         )
-
-        time.sleep(10)
-        file = "./output_eleven_labs_tts/voice{}.mp3".format(i)
-        save(audio,file)
+        
+        # Define and save the output file for the current audio
+        file_path = f"./output_eleven_labs_tts/voice_{idx}.mp3"
+        save(audio, file_path)
+        
+        # Pause to ensure API call stability
         time.sleep(5)
-        audios.append(file)
-        #audios.append("./output_eleven_labs_tts/silence.mp3")
-        i=i+1
-    clips = [AudioFileClip(c) for c in audios]
-    final_clip = concatenate_audioclips(clips)
-    final_clip = final_clip.volumex(1.7)
+        audio_files.append(file_path)
+
+    # Concatenate all audio clips
+    print("Concatenating audio files...")
+    audio_clips = [AudioFileClip(file) for file in audio_files]
+    final_clip = concatenate_audioclips(audio_clips).volumex(1.7)
     final_clip.write_audiofile("./output_eleven_labs_tts/voice.mp3")
 
-    
+    print("Process completed: Final audio saved as voice.mp3")
 
-main()
+if __name__ == "__main__":
+    main()
