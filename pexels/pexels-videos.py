@@ -1,15 +1,28 @@
 import requests
 import os
+from dotenv import load_dotenv
 
-# Your Pexels API key
-API_KEY = '0QsdDQy5jYrUXhonKtkKFdVr2oUsJCW9EyaYjBCOBOOGcbbVmA4P88wx'
+# Load environment variables from a .env file
+load_dotenv()
 
-# Set up the request headers with your API key
+# Description:
+# This script searches for videos on Pexels using their API and downloads the results.
+# The search query, result count per page, and page number can be customized.
+# Results are saved in a "videos" directory in the current working directory.
+# To use this script, create a .env file with your Pexels API key:
+#     PEXELS_API_KEY='your_api_key_here'
+
+# Retrieve the Pexels API key from environment variables
+API_KEY = os.getenv('PEXELS_API_KEY')
+if not API_KEY:
+    raise ValueError("API key not found. Please add it to a .env file as PEXELS_API_KEY='your_api_key_here'")
+
+# Set up the request headers with the API key
 headers = {
     'Authorization': API_KEY,
 }
 
-# Define the search endpoint and parameters
+# Define the search endpoint and parameters for videos
 search_url = 'https://api.pexels.com/videos/search'
 params = {
     'query': 'nature',  # Search query
