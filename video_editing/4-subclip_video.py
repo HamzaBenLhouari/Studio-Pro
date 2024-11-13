@@ -1,72 +1,35 @@
-"""
-    This Script takes the first Video in tha path given
-    You Need Input Video File Here
-    Put your Video in "4-input_video" directory 
-    and wait the output video in 
-    "4-output_subclip" directory
-    ++++++++++++++++++++++++++++
-    We can use One of Two Methods to subclip a Video
-"""
 import os
-import fnmatch
 from moviepy.editor import VideoFileClip
 
+INPUT_DIR = "./4-input_video"
+OUTPUT_FILE = "./4-output_subclip/out.mp4"
 
-def video_to_subclip():
-    print("getting video")
+def fetch_first_video() -> str:
+    """Fetches the first MP4 video file from the input directory."""
+    for file in os.listdir(INPUT_DIR):
+        if file.endswith(".mp4"):
+            return os.path.join(INPUT_DIR, file)
+    print("No MP4 video found in the input directory.")
+    return ""
 
-    listdir = os.listdir('./4-input_video')
-    if len(listdir) == 0 :
-        print("video not found")
-        return ""
-    
-    video=listdir[0]
-    
-    if fnmatch.fnmatch(video, '*.mp4'):
-        print(video)
-        video="./4-input_video/"+video
-        print("videos done")
-        return video
-    else :
-        return ""
-    
-def subclip_video(video):
-    #Starting time
-    start_h=0
-    start_min=0
-    start_sec=3
+def subclip_video(video_path: str, start_time: tuple = (0, 0, 3), end_time: tuple = (0, 0, 6)) -> None:
+    """Creates a subclip from the input video between start and end times."""
+    start_seconds = start_time[0] * 3600 + start_time[1] * 60 + start_time[2]
+    end_seconds = end_time[0] * 3600 + end_time[1] * 60 + end_time[2]
 
-    start_time = (start_h*3600) + (start_min*60) + (start_sec)
-    # You can use this format also
-    #start_time="01:03:05.35"
-    #ending time
-    end_h=0
-    end_min=0
-    end_sec=6
-    end_time = (end_h*3600) + (end_min*60) + (end_sec)
-    # You can use this format also
-    #end_time="01:03:05.35"
-
-    video_clip = VideoFileClip(video)
-
-    if start_time < end_time :
-
-        final_video_file = video_clip.subclip(start_time, end_time)
-        
-        final_video_file.write_videofile("./4-output_subclip/out.mp4",
-                                    fps=30,
-                                    remove_temp=True,
-                                    codec="libx264",
-                                    audio_codec="aac",
-                                    threads = 6)
-    else : 
-        print("check time")
-
-def main():
-    video = video_to_subclip()
-    if video == "" :
-        print("video not found")
+    if start_seconds >= end_seconds:
+        print("Error: Start time must be less than end time.")
         return
-    subclip_video(video)
 
-main()
+    video_clip = VideoFileClip(video_path).subclip(start_seconds, end_seconds)
+    os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
+    video_clip.write_videofile(OUTPUT_FILE, fps=30, codec="libx264", audio_codec="aac", threads=6)
+    print(f"Subclip saved as {OUTPUT_FILE}")
+
+def main() -> None:
+    video_path = fetch_first_video()
+    if video_path:
+        subclip_video(video_path)
+
+if __name__ == "__main__":
+    main()

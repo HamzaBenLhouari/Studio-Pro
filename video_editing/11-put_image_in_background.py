@@ -1,67 +1,84 @@
 """
-11-input_image_in_background
-bg_img
-11-output_image_in_background
+This script overlays multiple videos on a background image.
+- Place your main videos in the "11-input_image_in_background" folder.
+- Place a single background image in "11-input_image_in_background/bg_img" folder.
+- The output will be saved in "11-output_image_in_background" as 'out.mp4' (or 'out1.mp4', 'out2.mp4', etc., if 'out.mp4' already exists).
+
+Functionality:
+1. Resizes and centers each video on top of the background image.
+2. Adds a fade-in effect as each video appears sequentially.
+3. Sets the background image to match the total duration of all videos.
 """
+
 import os
 import fnmatch
 from moviepy.editor import ImageClip, VideoFileClip, CompositeVideoClip
 
-def get_files(tmp):
-    dir = ""
-    extensions=[]
-    if tmp == "videos":
-        dir="./11-input_image_in_background"
-        extensions=["*.mp4"]
-    if tmp == "bg_img":
-        dir = "./11-input_image_in_background/bg_img"
-        extensions=['*.jpg', '*.jpeg', '*.png', '*.bmp', '*.gif', '*.tiff']
-    print("getting videos")
-    files=[]
-    for file in os.listdir(dir):
+# Constants for directories and output file
+INPUT_VIDEOS_DIR = "./11-input_image_in_background"
+INPUT_BG_IMG_DIR = "./11-input_image_in_background/bg_img"
+OUTPUT_DIR = "./11-output_image_in_background"
+OUTPUT_FILENAME = "out.mp4"
+
+
+def get_files(folder, extensions):
+    """
+    Fetches files from a specified folder based on extensions.
+    """
+    files = []
+    for file in os.listdir(folder):
         if any(fnmatch.fnmatch(file.lower(), ext) for ext in extensions):
-            print(file)
-            files.append(os.path.join(dir, file))
-            if tmp == "bg_img":
-                return files
-    if len(files) == 0:
-        return files
-    print("files done")
+            files.append(os.path.join(folder, file))
     return files
 
-def put_bg_img(videos,bg_img):
 
-    img_clip=ImageClip(bg_img[0])
+def get_unique_output_path():
+    """
+    Generates a unique output file path if the default output file already exists.
+    """
+    base_output_path = os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)
+    output_path = base_output_path
+    count = 1
+    while os.path.exists(output_path):
+        output_path = os.path.join(OUTPUT_DIR, f"out{count}.mp4")
+        count += 1
+    return output_path
 
-    w_video, h_video = img_clip.size
-    width_to_set = w_video*0.8
-    height_to_set = h_video*0.8
 
+def put_bg_img(videos, bg_img_path):
+    img_clip = ImageClip(bg_img_path)
     video_clips = []
-    end_time=2
+    end_time = 2
 
     for video in videos:
-        clip = VideoFileClip(video)#.resize((width_to_set,height_to_set))
-        clip= clip.set_pos(("center", "center")).set_start(end_time).crossfadein(1)
+        clip = VideoFileClip(video).set_pos(("center", "center")).set_start(end_time).crossfadein(1)
         video_clips.append(clip)
-        end_time=end_time+clip.duration+1
+        end_time += clip.duration + 1
 
     img_clip = img_clip.set_duration(end_time)
 
-    final_video_file = CompositeVideoClip([img_clip, *video_clips])
-        
-    final_video_file.write_videofile("./11-output_image_in_background/out.mp4",
-                                    remove_temp=True,
-                                    codec="libx264",
-                                    audio_codec="aac",
-                                    threads = 6)
-    
-def main():
-    videos = get_files("videos")
-    bg_img = get_files("bg_img")
-    if(len(videos)==0 or len(bg_img)==0):
-        print("check your files")
-        return
-    put_bg_img(videos,bg_img)
+    final_video = CompositeVideoClip([img_clip, *video_clips])
+    output_path = get_unique_output_path()
+    final_video.write_videofile(output_path,
+                                remove_temp=True,
+                                codec="libx264",
+                                audio_codec="aac",
+                                threads=6)
 
-main()
+
+def main():
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
+
+    videos = get_files(INPUT_VIDEOS_DIR, ["*.mp4"])
+    bg_imgs = get_files(INPUT_BG_IMG_DIR, ['*.jpg', '*.jpeg', '*.png', '*.bmp', '*.gif', '*.tiff'])
+
+    if not videos or not bg_imgs:
+        print("Check your folders: ensure both the main videos and background image are available.")
+        return
+
+    put_bg_img(videos, bg_imgs[0])
+
+
+if __name__ == "__main__":
+    main()

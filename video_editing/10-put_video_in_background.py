@@ -1,67 +1,91 @@
 """
-10-input_video_in_background
-bg_video
-10-output_video_in_background
+This script overlays a series of videos on a background video.
+- Place your main videos in the "10-input_video_in_background" folder.
+- Place a single background video in "10-input_video_in_background/bg_video" folder.
+- The output will be saved in "10-output_video_in_background" as 'out.mp4' (or 'out1.mp4', 'out2.mp4', etc., if 'out.mp4' already exists).
+
+Functionality:
+1. The script automatically resizes and centers each input video over the background.
+2. Each video is added sequentially, with a fade-in effect between them.
+3. If the combined duration of the input videos exceeds the background video length, 
+   the background will loop to match the total duration.
 """
+
 import os
 import fnmatch
 from moviepy.editor import VideoFileClip, CompositeVideoClip
 import moviepy.video.fx.all as vfx
 
-def fetch_videos(tmp):
-    dir = ""
-    if tmp == "videos":
-        dir="./10-input_video_in_background"
-    if tmp == "bg_v":
-        dir = "./10-input_video_in_background/bg_video"
-    print("getting videos")
-    videos=[]
-    for file in os.listdir(dir):
-        if fnmatch.fnmatch(file, '*.mp4'):
-            print(file)
-            videos.append(os.path.join(dir, file))
-            if tmp == "bg_v":
-                return videos
-    if len(videos) == 0:
-        return videos
-    print("videos done")
+# Constants for directories and output file
+INPUT_VIDEOS_DIR = "./10-input_video_in_background"
+INPUT_BG_VIDEO_DIR = "./10-input_video_in_background/bg_video"
+OUTPUT_DIR = "./10-output_video_in_background"
+OUTPUT_FILENAME = "out.mp4"
+
+
+def fetch_videos(folder, extensions="*.mp4"):
+    """
+    Fetches video files from a specified folder based on extension.
+    """
+    videos = []
+    for file in os.listdir(folder):
+        if fnmatch.fnmatch(file, extensions):
+            videos.append(os.path.join(folder, file))
     return videos
 
-def put_bg_video(videos,bg_video):
 
-    bg_v = VideoFileClip(bg_video[0])
-    w_video, h_video = bg_v.size
-    width_to_set = w_video*0.8
-    height_to_set = h_video*0.8
+def get_unique_output_path():
+    """
+    Generates a unique output file path by adding an incremental number
+    if the default output file already exists.
+    """
+    base_output_path = os.path.join(OUTPUT_DIR, OUTPUT_FILENAME)
+    output_path = base_output_path
+    count = 1
+    while os.path.exists(output_path):
+        output_path = os.path.join(OUTPUT_DIR, f"out{count}.mp4")
+        count += 1
+    return output_path
 
+
+def put_bg_video(videos, bg_video_path):
+    bg_video = VideoFileClip(bg_video_path)
     video_clips = []
-    end_time=2
+    end_time = 2
 
     for video in videos:
-        clip = VideoFileClip(video)#.resize((width_to_set,height_to_set))
-        clip= clip.set_pos(("center", "center")).set_start(end_time).crossfadein(1)
+        clip = VideoFileClip(video)
+        clip = clip.set_pos(("center", "center")).set_start(end_time).crossfadein(1)
         video_clips.append(clip)
-        end_time=end_time+clip.duration+1
-    
-    if bg_v.duration < end_time:
-        bg_v = bg_v.fx(vfx.loop,duration=end_time)
-    else : 
-        bg_v.subclip(0,end_time)
+        end_time += clip.duration + 1
 
-    
-    final_video_file = CompositeVideoClip([bg_v, *video_clips])
-        
-    final_video_file.write_videofile("./10-output_video_in_background/out.mp4",
-                                    remove_temp=True,
-                                    codec="libx264",
-                                    audio_codec="aac",
-                                    threads = 6)
+    if bg_video.duration < end_time:
+        bg_video = bg_video.fx(vfx.loop, duration=end_time)
+    else:
+        bg_video = bg_video.subclip(0, end_time)
+
+    final_video = CompositeVideoClip([bg_video, *video_clips])
+    output_path = get_unique_output_path()
+    final_video.write_videofile(output_path,
+                                remove_temp=True,
+                                codec="libx264",
+                                audio_codec="aac",
+                                threads=6)
+
+
 def main():
-    videos = fetch_videos("videos")
-    bg_video = fetch_videos("bg_v")
-    if(len(videos)==0 or len(bg_video)==0):
-        print("check your videos")
-        return
-    put_bg_video(videos,bg_video)
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
 
-main()
+    videos = fetch_videos(INPUT_VIDEOS_DIR)
+    bg_video_files = fetch_videos(INPUT_BG_VIDEO_DIR)
+    
+    if not videos or not bg_video_files:
+        print("Check your video folders: make sure both the main videos and background video are available.")
+        return
+    
+    put_bg_video(videos, bg_video_files[0])
+
+
+if __name__ == "__main__":
+    main()

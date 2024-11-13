@@ -1,53 +1,34 @@
-"""
-    You Need Input Files Here (Images)
-    Put your Images in "3-input_video_from_images" directory 
-    and wait the output video in 
-    "3-output_video_from_images" directory
-"""
 import os
-import fnmatch
 from moviepy.editor import concatenate_videoclips, ImageClip
 
-def fetch_images():
-    print("getting videos")
-    image_extensions = ['*.jpg', '*.jpeg', '*.png', '*.bmp', '*.gif', '*.tiff']
-    images=[]
-    # Folder containing images
-    image_folder = "./3-input_video_from_images"
-    for file in os.listdir(image_folder):
-        if any(fnmatch.fnmatch(file.lower(), ext) for ext in image_extensions):
-            print(file)
-            images.append(os.path.join(image_folder, file))
-    if len(images) == 0:
-        return
-    print("Images done")
+INPUT_DIR = "./3-input_video_from_images"
+OUTPUT_FILE = "./3-output_video_from_images/out.mp4"
+IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff'}
+
+def fetch_images() -> list[str]:
+    """Fetches all images from the input directory with specified extensions."""
+    images = [os.path.join(INPUT_DIR, file) for file in os.listdir(INPUT_DIR)
+              if any(file.lower().endswith(ext) for ext in IMAGE_EXTENSIONS)]
+    if not images:
+        print("No images found in the input directory.")
     return images
 
-def create_video_from_images(images):
-
-    # Each image will be shown for 2 seconds 
-    # You can change the duration 
-    duration = 2
+def create_video_from_images(images: list[str], duration: int = 2, crossfade_duration: int = 1) -> None:
+    """Creates a video from images, applying crossfade transitions."""
     clips = [ImageClip(img).set_duration(duration) for img in images]
-
-    # Optionally add a crossfade transition between images
-    crossfade_duration = 1  # Duration of crossfade in seconds
     clips = [clips[i].crossfadein(crossfade_duration) for i in range(len(clips))]
-
-    # Concatenate the ImageClips into a single video clip
     video = concatenate_videoclips(clips, method="compose")
+    
+    os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
+    video.write_videofile(OUTPUT_FILE, fps=24, codec="libx264")
+    print(f"Output video saved as {OUTPUT_FILE}")
 
-    # Write the final video to a file
-    video.write_videofile("./3-output_video_from_images/out.mp4", fps=24, codec="libx264")
-
-def main():
-
+def main() -> None:
     images = fetch_images()
-    
-    if len(images) <= 1 :
-        print("verify your files please! You must have more than one image")
+    if len(images) < 2:
+        print("Please verify: You must have more than one image.")
         return
-    
     create_video_from_images(images)
 
-main()
+if __name__ == "__main__":
+    main()
