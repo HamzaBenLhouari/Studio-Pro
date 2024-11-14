@@ -6,7 +6,9 @@ import re
 import time
 import moviepy.video.fx.all as vfx
 import moviepy.audio.fx.all as afx
-session_id="32d5799cd747a4e2ce47cafb59a1a0e4"
+from dotenv import load_dotenv
+# Ensure environment variables are loaded
+load_dotenv()
 
 voice_character={
     "podcaster":"en_us_002",
@@ -41,79 +43,116 @@ voice_character={
 """
 
 def get_script():
-    print("getting text script")
-    script=""
-    with open("./script/script.txt") as f:
+    """
+    Reads the text script from the file located at './script/script.txt'.
+    Returns the content of the script as a string. If the script is empty, it logs a message.
+    """
+    script_path = "./script/script.txt"
+
+    if not os.path.exists(script_path):
+        print(f"Error: The script file at '{script_path}' does not exist.")
+        return ""
+    
+    print("Getting text script...")
+    with open(script_path, 'r') as f:
         script = f.read()
-    if script == "" :
-        print("script is empty")
-    else : print("text script done")
+
+    if not script:
+        print("Warning: The script is empty.")
+    else:
+        print("Text script loaded successfully.")
+
     return script
 
 def generate_voice():
 
+    # Retrieve session_id from the .env file
+    session_id = os.getenv('TIKTOK_SESSION_ID')
+
+    if not session_id:
+        print("Error: TIKTOK_SESSION_ID not found in .env file.")
+        return
+    
+    # Get the script content
     script = get_script()
-    if script == "" :
+    if script == "":
         return
         
-    script=re.sub(r'\n','',script)
+    script = re.sub(r'\n', '', script)
     voices = script.split("##")
-    i=1
-    audios=[]
+    i = 1
+    audios = []
+
+    # Loop through each voice section in the script
     for voice in voices:
-        rep=voice.split(":")
-        model=rep[0].replace(" ", "")
-        voice_type=voice_character[model]
-        if (voice_type and len(rep[1])<300 ):
+        rep = voice.split(":")
+        model = rep[0].replace(" ", "")
+        voice_type = voice_character[model]  # Assuming voice_character is predefined
+        if voice_type and len(rep[1]) < 300:
             time.sleep(10)
-            tts(session_id,voice_type,rep[1],"./audios/voice{}.mp3".format(i),False)
+            # Call the tts function to generate voice
+            tts(session_id, voice_type, rep[1], f"./audios/voice{i}.mp3", False)
             time.sleep(10)
-            audios.append("./audios/voice{}.mp3".format(i))
-            #audios.append("./audios/silence.mp3")
-            i=i+1
-        else :
-            print(f"error in voice type or length of text")
-    audios.append("./audios/silence.mp3")
+            audios.append(f"./audios/voice{i}.mp3")
+            i += 1
+        else:
+            print(f"Error in voice type or length of text")
+
+    audios.append("./audios/silence.mp3")  # Adding silence to the end for proper audio flow
+
+    # Combine all audio clips
     clips = [AudioFileClip(c) for c in audios]
     final_clip = concatenate_audioclips(clips)
-    final_clip = final_clip.volumex(1.7)
-    final_clip.write_audiofile("./audios/voice.mp3")
-    for audio in audios :
+    final_clip = final_clip.volumex(1.7)  # Adjust volume
+    final_clip.write_audiofile("./audios/voice.mp3")  # Save the final audio
+
+    # Clean up temporary audio files
+    for audio in audios:
         if audio != "./audios/silence.mp3":
             os.remove(audio)
 
 def generate_video():
+    # Retrieve file paths for image, audio, and background music
     image = get_file("img")
-    if image == "":
-        print("no image found!")
+    if not image:
+        print("No image found!")
         return
     
-    audio= get_file("audio")
-    if audio == "":
-        print("no audio found!")
+    audio = get_file("audio")
+    if not audio:
+        print("No audio found!")
         return
     
     bg_music = get_file("bg_m")
-    if bg_music == "":
-        print("no background music found!")
+    if not bg_music:
+        print("No background music found!")
         return
 
-    audio = AudioFileClip(audio)
-    image = ImageClip(image)
-    bg_music= AudioFileClip(bg_music)
+    # Load the image, audio, and background music clips
+    image_clip = ImageClip(image)
+    audio_clip = AudioFileClip(audio)
+    bg_music_clip = AudioFileClip(bg_music).volumex(0.3)
 
-    if bg_music.duration < audio.duration:
-        bg_music=afx.audio_loop(audio,duration=audio.duration+1)
-        bg_music.fx(afx.audio_fadein,1).fx(afx.audio_fadeout,1)
-    else :
-        bg_music.subclip(0,audio.duration+1)
-        bg_music.fx(afx.audio_fadein,1).fx(afx.audio_fadeout,1)
-
-    final_audio = CompositeAudioClip([bg_music,audio])
-    final_clip = image.set_duration(final_audio.duration).set_audio(final_audio)
-    final_clip = final_clip.fx(vfx.fadein,1).fx(vfx.fadeout,1)
-    final_clip.write_videofile("./finalvideo.mp4",
-                              audio_codec='aac', fps=30, threads=4)
+    # Adjust background music duration
+    if bg_music_clip.duration < audio_clip.duration:
+        bg_music_clip = afx.audio_loop(bg_music_clip, duration=audio_clip.duration + 1)
+    else:
+        bg_music_clip = bg_music_clip.subclip(0, audio_clip.duration + 1)
+    
+    # Apply fade effects to background music and final video clip
+    bg_music_clip = bg_music_clip.fx(afx.audio_fadein, 1).fx(afx.audio_fadeout, 1)
+    
+    # Combine background music and audio
+    final_audio = CompositeAudioClip([bg_music_clip, audio_clip])
+    
+    # Set the duration of the image clip to match the final audio
+    final_clip = image_clip.set_duration(final_audio.duration).set_audio(final_audio)
+    
+    # Apply fade-in and fade-out effects to the video
+    final_clip = final_clip.fx(vfx.fadein, 1).fx(vfx.fadeout, 1)
+    
+    # Write the final video to a file
+    final_clip.write_videofile("./finalvideo.mp4", audio_codec='aac', fps=30, threads=4)
 
 def tts(session_id: str, text_speaker: str = "en_us_002", req_text: str = "TikTok Text To Speech", filename: str = 'voice.mp3', play: bool = False):
 
@@ -162,29 +201,35 @@ def tts(session_id: str, text_speaker: str = "en_us_002", req_text: str = "TikTo
 
     return output_data
 
-
 def get_file(file):
     rslt = ""
-    folder=""
+    folder = ""
+    # List of image extensions to check
+    image_extensions = ['*.jpg', '*.jpeg', '*.png', '*.bmp', '*.gif', '*.tiff']
+
+    # Check for 'img' files (image files)
     if file == "img":
-        folder = "./image"
+        folder = "./image"  # Assuming image folder is './image'
         listdir = os.listdir(folder)
-        for file in listdir:
-            if fnmatch.fnmatch(file.lower(), 'voice.mp3'):
-                rslt = os.path.join(folder, file)
-                return rslt
-    if file == "audio":
-        folder = "./audios/"
+        for f in listdir:
+            if any(fnmatch.fnmatch(f.lower(), ext) for ext in image_extensions):
+                rslt = os.path.join(folder, f)
+                return rslt  # Return first valid image found
+    # Check for 'audio' files (audio files)
+    elif file == "audio":
+        folder = "./audios/"  # Assuming audio folder is './audios'
         listdir = os.listdir(folder)
-        for file in listdir:
-            if fnmatch.fnmatch(file.lower(), 'voice.mp3'):
-                rslt = os.path.join(folder, file)
-                return rslt
-    if file == "bg_m":
-        folder = "./bg_music"
+        for f in listdir:
+            if fnmatch.fnmatch(f.lower(), 'voice.mp3'):  # Assuming only 'voice.mp3' is expected
+                rslt = os.path.join(folder, f)
+                return rslt  # Return the first valid audio file found
+    # Check for 'bg_m' files (background music files)
+    elif file == "bg_m":
+        folder = "./bg_music"  # Assuming background music folder is './bg_music'
         listdir = os.listdir(folder)
-        for file in listdir:
-            if fnmatch.fnmatch(file.lower(), '*.mp3'):
-                rslt = os.path.join(folder, file)
-                return rslt
-    return rslt
+        for f in listdir:
+            if fnmatch.fnmatch(f.lower(), '*.mp3'):  # Background music is expected to be an mp3 file
+                rslt = os.path.join(folder, f)
+                return rslt  # Return the first valid background music file found
+
+    return rslt  # Return empty string if no valid file is found
