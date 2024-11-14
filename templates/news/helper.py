@@ -8,8 +8,6 @@ from PIL import Image
 pip uninstall Pillow
 pip install Pillow==9.5.0
 """
-voice_type="en_us_009"
-sessionid="32d5799cd747a4e2ce47cafb59a1a0e4"
 
 def download_image(image,title):
     # Send a GET request to the URL
@@ -79,54 +77,62 @@ def tts(session_id: str, text_speaker: str = "en_us_002", req_text: str = "TikTo
     return output_data
 
 
-def generate_video(images,audios):
-    audio_clips =[]
+def generate_video(images, audios):
+    audio_clips = []
     image_clips = []
+    
+    # Get background video
     bg_video = get_bg('*.mp4')
+    if not bg_video:
+        print("No background video file found.")
+        return
     video_Clip = VideoFileClip(bg_video)
-
     end_time = 0
-
     w_video, h_video = video_Clip.size
 
-    for (c,a) in zip(images,audios):
-        image_clip = configure_image(c,w_video,h_video)
+    # Create clips for each image/audio pair
+    for (c, a) in zip(images, audios):
+        image_clip = configure_image(c, w_video, h_video)  # Assuming this function is defined elsewhere
         audio_clip = AudioFileClip(a).set_start(end_time)
+        
         audio_clips.append(audio_clip)
-        image_clips.append(image_clip.set_start(end_time)
-                                     .set_pos("center", "center")
-                                     .set_duration(audio_clip.duration)
-                                     .set_audio(audio_clip))
+        image_clips.append(
+            image_clip.set_start(end_time)
+                      .set_pos("center", "center")
+                      .set_duration(audio_clip.duration)
+                      .set_audio(audio_clip)
+        )
         end_time = end_time + audio_clip.duration + 0.75
-    
-    if video_Clip.duration < end_time :
-            video_Clip = video_Clip.fx(vfx.loop,duration=end_time + 0.75)
-    else :
+
+    # Ensure background video matches the final duration
+    if video_Clip.duration < end_time:
+        video_Clip = video_Clip.fx(vfx.loop, duration=end_time + 0.75)
+    else:
         video_Clip = video_Clip.subclip(0, end_time + 0.75)
 
-    audio_final = CompositeAudioClip(
-            [*audio_clips])
+    # Create final composite audio clip
+    audio_final = CompositeAudioClip(audio_clips)
     video_Clip.audio = audio_final
 
-    final_video_file = CompositeVideoClip(
-            [video_Clip, *image_clips])
-    
-    # adding background music 
+    # Create final composite video clip
+    final_video_file = CompositeVideoClip([video_Clip, *image_clips])
 
-    secs=final_video_file.duration
+    # Add background music
+    secs = final_video_file.duration
     bg_audio = get_bg('*.mp3')
+    if not bg_audio:
+        print("No background music file found.")
+        return
     back_audio = AudioFileClip(bg_audio).volumex(0.3)
-    
-    if back_audio.duration < secs :
-        back_audio=afx.audio_loop(back_audio,duration=secs)
-      
-    final_audio = CompositeAudioClip([final_video_file.audio,back_audio])
+    if back_audio.duration < secs:
+        back_audio = afx.audio_loop(back_audio, duration=secs)
+
+    final_audio = CompositeAudioClip([final_video_file.audio, back_audio])
     final_video_file = final_video_file.set_audio(final_audio)
     final_video_file = final_video_file.set_duration(secs)
-        
-    final_video_file.write_videofile("./finalvideo.mp4",
-                              audio_codec='aac', fps=30, threads=4)
 
+    # Write final video to file
+    final_video_file.write_videofile("./final_video.mp4", audio_codec='aac', fps=30, threads=4)
     
 
 def configure_image(image,w_video,h_video):
@@ -145,16 +151,22 @@ def configure_image(image,w_video,h_video):
 
 def get_bg(ext):
     folder = ""
+    
     if ext == "*.mp4":
-        folder = "./bg_video"
-    else :
-        folder = "./bg_music"
-    rslt=""
-    listdir = os.listdir(folder)
-    if len(listdir) != 0 :
-        for file in listdir:
-            if fnmatch.fnmatch(file.lower(), ext):
+        folder = os.path.join(".", "bg_video")
+    else:
+        folder = os.path.join(".", "bg_music")
+    
+    # Initialize result variable
+    rslt = ""
+    
+    # Check if the folder exists and list its contents
+    if os.path.exists(folder) and os.listdir(folder):
+        for file in os.listdir(folder):
+            if fnmatch.fnmatch(file, ext):  # Case-insensitive match
                 print(file)
                 rslt = os.path.join(folder, file)
                 return rslt
+    
+    # Return an empty string if no match is found
     return rslt

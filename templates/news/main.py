@@ -1,9 +1,27 @@
 from newsapi import NewsApiClient
-from helper import tts, generate_video, download_image, sessionid, voice_type
+from helper import tts, generate_video, download_image
 import time
 import os
-#my_api_key='902b84a90473457c8778e40f163e4259'
-api = NewsApiClient(api_key='902b84a90473457c8778e40f163e4259')
+from dotenv import load_dotenv
+import sys
+
+# Ensure environment variables are loaded
+load_dotenv()
+
+# Retrieve sessionid from the .env file
+sessionid = os.getenv('TIKTOK_SESSION_ID')
+
+# Retrieve new_api_key from the .env file
+new_api_key = os.getenv('NEWS_API_KEY')
+
+if not sessionid or not new_api_key:
+    print("Error: TIKTOK_SESSION_ID OR NEWS_API_KEY not found in .env file.")
+    sys.exit()
+
+# The voice 
+voice_type="en_us_009"
+
+api = NewsApiClient(api_key=new_api_key)
 
 topheadlines = api.get_top_headlines(sources='bbc-news')
 #topheadlines = api.get_top_headlines(country='us')
