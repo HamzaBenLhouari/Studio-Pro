@@ -1,8 +1,0 @@
-## Setup
-
-This project requires a `.env` file for storing API keys and other sensitive information. To set it up:
-
-1. Copy the `.env.example` file to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
