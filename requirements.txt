@@ -1,0 +1,11 @@
+moviepy==1.0.3
+elevenlabs
+python-dotenv
+requests
+pillow==9.5.0
+numpy
+newsapi-python
+manim
+pydub
+playsound
+ImageMagic==0.2.1

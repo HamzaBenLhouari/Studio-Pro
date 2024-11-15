@@ -1,4 +1,3 @@
-import os
 from pyfiglet import Figlet
 
 def welcome_message():
@@ -13,7 +12,8 @@ def welcome_message():
 
     1. **Video Editing**: Learn how to cut, merge, add effects, and more.
     2. **Text-to-Speech**: Use TikTok and ElevenLabs APIs to add speech to your videos.
-    3. **Video Creation**: Practice creating educational, news, podcasts, and storytelling videos.
+    3. **Pexels**: Video and image resources retrieved via the Pexels API
+    4. **Templates**: Practice creating educational, news, podcasts, and storytelling videos.
     We can add AI to this project to generate content based on PDF files
     To get started, explore the tutorials and examples provided in each section.
     """
@@ -25,7 +25,8 @@ if __name__ == "__main__":
 
     print("\nNext Steps:")
     print("1. Navigate to the 'video_editing' folder to start with the video editing tutorials.")
-    print("2. Check out the 'text_to_speech' folder for TTS integration.")
-    print("3. Explore the 'video_creation' folder for practical video creation examples.")
+    print("2. Check out the 'tts' folder for TTS integration.")
+    print("3. Visit the 'pexels' folder for video and image resources retrieved via the Pexels API.")
+    print("4. Check out the 'templates' folder for practical video creation examples/templates.")
     print("\nHappy Coding!")
     print(Figlet(font="cybermedium").renderText("Hamza Ben"))
