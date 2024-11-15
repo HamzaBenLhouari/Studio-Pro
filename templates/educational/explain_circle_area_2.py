@@ -1,8 +1,14 @@
+"""
+Use 'Combine_plus_bg_music.py' when this script is done.
+Don't forget to copy and paste the generated video
+and rename it to final_video.mp4.
+"""
 from manim import *
 from moviepy.editor import AudioFileClip, concatenate_audioclips
 from elevenlabs import set_api_key, generate, save
 from pydub import AudioSegment
 import os
+from dotenv import load_dotenv
 
 class ExplainSharpeRatio(Scene):
 
@@ -15,7 +21,12 @@ class ExplainSharpeRatio(Scene):
         return AudioFileClip(file).duration
 
     def generate_tts_audio(self, text, filename):
-        api_key = "3cd04161eb64b39de66b5d198babc762"
+        # Load environment variables from a .env file
+        load_dotenv()
+        # Retrieve the API key from environment variables
+        api_key = os.getenv('ELEVEN_LABS_KEY')
+        if not api_key:
+            raise ValueError("API key not found. Please add it to a .env file as ELEVEN_LABS_KEY='your_api_key_here'")
         set_api_key(api_key)
         audio = generate(text=text, voice="Lily", model="eleven_multilingual_v2")
         save(audio, filename)

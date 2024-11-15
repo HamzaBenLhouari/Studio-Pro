@@ -1,14 +1,20 @@
 from manim import *
 from moviepy.editor import AudioFileClip
 from elevenlabs import set_api_key,generate, save
+import os
+from dotenv import load_dotenv
 
 class ExplainSharpeRatio(Scene):
     def get_duration(self,file):
         return AudioFileClip(file).duration
 
     def generate_tts_audio(self, text, filename):
-        # Replace this with actual API call logic to get the audio file
-        api_key = "3cd04161eb64b39de66b5d198babc762"
+        # Load environment variables from a .env file
+        load_dotenv()
+        # Retrieve the API key from environment variables
+        api_key = os.getenv('ELEVEN_LABS_KEY')
+        if not api_key:
+            raise ValueError("API key not found. Please add it to a .env file as ELEVEN_LABS_KEY='your_api_key_here'")
         set_api_key(api_key)
         audio = generate(
                         text=text,
